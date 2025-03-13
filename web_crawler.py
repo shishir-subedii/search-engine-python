@@ -11,9 +11,19 @@ CSV_FILE = "crawled_data.csv"
 
 # 🌱 Seed URLs
 seed_urls = [
+    "https://www.bbc.com",
+    "https://techcrunch.com",
+    "https://www.nature.com",
+    "https://www.imdb.com",
+    "https://www.bloomberg.com",
+    "https://www.espn.com",
+    "https://www.webmd.com",
+    "https://www.amazon.com",
+    "https://www.khanacademy.org",
     "https://en.wikipedia.org/wiki/Main_Page",
     "https://www.nytimes.com/"
 ]
+
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
