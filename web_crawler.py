@@ -71,25 +71,24 @@ def extract_links(url, visited_urls):
             return []
 
         soup = BeautifulSoup(response.text, "html.parser")
-        links = set()
-        external_links = set()
+        new_links = set()
 
         for link in soup.find_all("a", href=True):
             absolute_url = urljoin(url, link["href"])
             parsed_url = urlparse(absolute_url)
 
-            # Ignore non-http/https links
             if parsed_url.scheme not in {"http", "https"}:
                 continue
 
-            # Separate Wikipedia and external links
-            if "wikipedia.org" in parsed_url.netloc:
-                links.add(absolute_url)
-            else:
-                external_links.add(absolute_url)
+            skip_keywords = {"logout", "signup", "register", "cart", "privacy"}
+            if any(word in absolute_url.lower() for word in skip_keywords):
+                continue
 
-        # Return external links first, then internal
-        return list(external_links) + list(links)
+            # Only add new links that haven't been visited
+            if absolute_url not in visited_urls:
+                new_links.add(absolute_url)
+
+        return list(new_links)
 
     except Exception as e:
         print(f"❌ Error extracting links from {url}: {e}")
