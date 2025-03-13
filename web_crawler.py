@@ -54,7 +54,7 @@ def extract_metadata(url):
         return None
 
 # 🔍 Extract new links from a page
-def extract_links(url):
+def extract_links(url, visited_urls):
     try:
         response = requests.get(url, headers=HEADERS, timeout=10)
         if response.status_code != 200:
@@ -62,20 +62,29 @@ def extract_links(url):
 
         soup = BeautifulSoup(response.text, "html.parser")
         links = set()
+        external_links = set()
 
         for link in soup.find_all("a", href=True):
             absolute_url = urljoin(url, link["href"])
             parsed_url = urlparse(absolute_url)
 
-            if parsed_url.scheme in {"http", "https"}:
-                links.add(absolute_url)
+            # Ignore non-http/https links
+            if parsed_url.scheme not in {"http", "https"}:
+                continue
 
-        print(f"🔗 Found {len(links)} new links on {url}")
-        return list(links)
+            # Separate Wikipedia and external links
+            if "wikipedia.org" in parsed_url.netloc:
+                links.add(absolute_url)
+            else:
+                external_links.add(absolute_url)
+
+        # Return external links first, then internal
+        return list(external_links) + list(links)
 
     except Exception as e:
         print(f"❌ Error extracting links from {url}: {e}")
         return []
+
 
 # 🕵️‍♂️ The Main Crawler Function
 def crawl(starting_urls):
@@ -105,7 +114,7 @@ def crawl(starting_urls):
             save_to_csv(metadata)
             print(f"✅ Saved: {metadata['title']} ({url})")
 
-        new_links = extract_links(url)
+        new_links = extract_links(url, visited_urls)
         to_crawl.extend(new_links)
 
         time.sleep(random.uniform(1, 3))  # Small delay to avoid rate-limiting
